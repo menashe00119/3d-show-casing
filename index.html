@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Product Landing Page</title>
+    <style>
+      body {
+        margin: 0;
+        overflow: hidden; /* Prevent scrollbars */
+      }
+      #canvas-container {
+        position: relative;
+        width: 100vw;
+        height: 100vh;
+      }
+      .product-info {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: rgba(255, 255, 255, 0.8);
+        padding: 20px;
+        border-radius: 15px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        max-width: 600px;
+        text-align: center;
+        z-index: 2; /* Ensure content is above the canvas */
+      }
+      .product-info h1 {
+        font-size: 2.5em;
+        margin: 0;
+        color: #333;
+      }
+      .product-info p {
+        font-size: 1.2em;
+        color: #666;
+      }
+      .product-info .image-container {
+        margin: 20px 0;
+      }
+      .product-info .image-container img {
+        width: 200px;
+        height: auto;
+        object-fit: cover;
+      }
+      .product-info .btn {
+        display: inline-block;
+        margin-top: 20px;
+        padding: 10px 20px;
+        font-size: 1em;
+        color: white;
+        background-color: #007bff;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        text-decoration: none;
+      }
+      .product-info .btn:hover {
+        background-color: #0056b3;
+      }
+      canvas {
+        display: block;
+      }
+    </style>
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://cdn.jsdelivr.net/npm/three@0.161/build/three.module.js",
+          "jsm/": "https://cdn.jsdelivr.net/npm/three@0.161/examples/jsm/"
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <div id="canvas-container">
+      <div class="product-info">
+        <h1>New Product Launch!</h1>
+        <div class="image-container">
+          <img src="phone.jpg.png" alt="Product Image" />
+        </div>
+        <p>
+          Experience the best quality and performance with our latest product.
+        </p>
+        <a href="#" class="btn">Buy Now</a>
+      </div>
+    </div>
+    <script type="module">
+      import * as THREE from "three";
+      import { OrbitControls } from "jsm/controls/OrbitControls.js";
+
+      let scene,
+        camera,
+        renderer,
+        fireworks = [];
+
+      function init() {
+        scene = new THREE.Scene();
+        camera = new THREE.PerspectiveCamera(
+          55,
+          window.innerWidth / window.innerHeight,
+          45,
+          30000
+        );
+        camera.position.set(-900, -200, -900);
+
+        renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+
+        // Append the renderer's canvas to the canvas-container div
+        document
+          .getElementById("canvas-container")
+          .appendChild(renderer.domElement);
+
+        let controls = new OrbitControls(camera, renderer.domElement);
+        controls.addEventListener("change", () =>
+          renderer.render(scene, camera)
+        );
+        controls.minDistance = 500;
+        controls.maxDistance = 1500;
+
+        // Add fireworks
+        createFireworks();
+
+        animate();
+      }
+
+      function createFireworks() {
+        let geometry = new THREE.BufferGeometry();
+        let vertices = [];
+        let colors = [];
+        let color = new THREE.Color();
+
+        for (let i = 0; i < 1000; i++) {
+          let x = THREE.MathUtils.randFloatSpread(2000);
+          let y = THREE.MathUtils.randFloatSpread(2000);
+          let z = THREE.MathUtils.randFloatSpread(2000);
+
+          vertices.push(x, y, z);
+
+          color.setHSL(x / 2000 + 0.5, 1.0, 0.5);
+          colors.push(color.r, color.g, color.b);
+        }
+
+        geometry.setAttribute(
+          "position",
+          new THREE.Float32BufferAttribute(vertices, 3)
+        );
+        geometry.setAttribute(
+          "color",
+          new THREE.Float32BufferAttribute(colors, 3)
+        );
+
+        let material = new THREE.PointsMaterial({
+          size: 10,
+          vertexColors: true,
+        });
+        let points = new THREE.Points(geometry, material);
+
+        fireworks.push(points);
+        scene.add(points);
+      }
+
+      function animate() {
+        requestAnimationFrame(animate);
+
+        fireworks.forEach((firework) => {
+          firework.rotation.y += 0.001;
+          firework.rotation.x += 0.001;
+        });
+
+        renderer.render(scene, camera);
+      }
+
+      init();
+    </script>
+  </body>
+</html>
